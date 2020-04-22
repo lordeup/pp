@@ -9,27 +9,34 @@ BlurBmp::BlurBmp(const std::string input, const std::string output, const int th
 {
 }
 
-void Blur(ThreadData& thread)
+std::vector<rgb_t> GetPixels(const int height, const int width, const ThreadData& thread)
 {
+	std::vector<rgb_t> pixels;
+
 	int blurRadius = thread.blurRadius;
 
+	for (int i = height - blurRadius; i <= height + blurRadius; ++i)
+	{
+		for (int j = width - blurRadius; j <= width + blurRadius; ++j)
+		{
+			int minHeight = std::min(thread.indexFunishHeight - 1, std::max(i, 0));
+			int minWidth = std::min(thread.indexFunisWidth - 1, std::max(j, 0));
+
+			rgb_t pixel = thread.inputImage.get_pixel(minWidth, minHeight);
+			pixels.push_back(pixel);
+		}
+	}
+
+	return pixels;
+}
+
+void Blur(ThreadData& thread)
+{
 	for (int height = thread.indexStartHeight; height < thread.indexFunishHeight; ++height)
 	{
 		for (int width = thread.indexStartWidth; width < thread.indexFunisWidth; ++width)
 		{
-			std::vector<rgb_t> pixels;
-
-			for (int i = height - blurRadius; i <= height + blurRadius; ++i)
-			{
-				for (int j = width - blurRadius; j <= width + blurRadius; ++j)
-				{
-					int minHeight = std::min(thread.indexFunishHeight - 1, std::max(i, 0));
-					int minWidth = std::min(thread.indexFunisWidth - 1, std::max(j, 0));
-
-					rgb_t pixel = thread.inputImage.get_pixel(minWidth, minHeight);
-					pixels.push_back(pixel);
-				}
-			}
+			std::vector<rgb_t> pixels = GetPixels(height, width, thread);
 
 			int totalRed = 0, totalGreen = 0, totalBlue = 0;
 
