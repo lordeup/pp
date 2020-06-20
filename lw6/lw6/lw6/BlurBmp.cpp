@@ -61,11 +61,10 @@ void Blur(ThreadData& thread)
 
 			thread.outputImage->set_pixel(width, height, colour);
 
-			double timeDifference = GetTimeDifference(thread.startTime);
+			std::string str = std::to_string(thread.threadNumber) + "\t" + std::to_string((int)GetTimeDifference(thread.startTime)) + "\n";
 
-			*thread.logFile << thread.threadNumber << "\t" << timeDifference << std::endl;
-
-			thread.logBuffer->LogData(std::to_string(timeDifference) + "\n");
+			*thread.logFile << str;
+			thread.logBuffer->LogData(str);
 		}
 	}
 }
