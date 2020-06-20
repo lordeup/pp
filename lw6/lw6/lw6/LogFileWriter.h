@@ -6,8 +6,8 @@ class LogFileWriter
 {
 public:
 	LogFileWriter(const std::string fileName);
-	
-	void LogFile();
+
+	void Log(const std::string str);
 
 private:
 	std::ofstream m_output;

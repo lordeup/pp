@@ -61,9 +61,11 @@ void Blur(ThreadData& thread)
 
 			thread.outputImage->set_pixel(width, height, colour);
 
-			thread.logBuffer->LogData(GetTimeDifference(thread.startTime));
+			double timeDifference = GetTimeDifference(thread.startTime);
 
-			//*thread.logFile << thread.threadNumber << "\t" << GetTimeDifference(thread.startTime) << std::endl;
+			*thread.logFile << thread.threadNumber << "\t" << timeDifference << std::endl;
+
+			thread.logBuffer->LogData(std::to_string(timeDifference) + "\n");
 		}
 	}
 }
@@ -99,10 +101,7 @@ std::vector<ThreadData> BlurBmp::GetThreadsData(const bitmap_image& inputImage, 
 {
 	std::vector<ThreadData> threadsData;
 
-	//LogFileWriter* logFileWriter = new LogFileWriter("logFileWriter.txt");
-	LogFileWriter logFileWriter("logFileWriter.txt");
-
-	LogBuffer* logBuffer = new LogBuffer(&logFileWriter);
+	LogBuffer* logBuffer = new LogBuffer(new LogFileWriter("logFileWriter.txt"));
 
 	for (int i = 0; i < m_threadCount; ++i)
 	{
@@ -140,7 +139,7 @@ void BlurBmp::Run()
 	int affinityMask = (1 << m_coreCount) - 1;
 	for (size_t i = 0; i < threadsData.size(); ++i)
 	{
-		handles[i] = CreateThread(NULL, 0, &ThreadProc, &threadsData[i], CREATE_SUSPENDED, NULL);
+		handles[i] = CreateThread(nullptr, 0, &ThreadProc, &threadsData[i], CREATE_SUSPENDED, nullptr);
 		SetThreadAffinityMask(handles[i], affinityMask);
 		SetThreadPriority(handles[i], m_threadPriorities[i]);
 	}

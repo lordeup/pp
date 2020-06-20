@@ -3,7 +3,7 @@
 #include <iostream>
 
 const int MIN_NUMBER_ARGUMENTS = 6;
-const std::string INFO_HINT = "To learn how to use the program, enter: SchedulerBlurBmp.exe /";
+const std::string INFO_HINT = "To learn how to use the program, enter: lw6.exe /";
 
 class Handler
 {

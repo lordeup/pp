@@ -17,7 +17,7 @@ void Handler::Run(int argc, char* argv[])
 	if (strcmp(argv[1], "/") == 0)
 	{
 		std::cout << "Input should look:\n"
-					 "DataSyncPrimitives.exe <input image> <output image> <number threads> <number core> <blur radius> <threads priorities>\n"
+					 "lw6.exe <input image> <output image> <number threads> <number core> <blur radius> <threads priorities>\n"
 					 "Options priority:\n"
 					 "-1 - below normal\n 0 - normal\n 1 - above normal\n";
 		return;

@@ -8,15 +8,17 @@ class LogBuffer
 public:
 	LogBuffer(LogFileWriter* logFileWriter);
 	~LogBuffer();
-	void LogData(const double data);
+	void LogData(const std::string data);
 
 private:
-	const size_t MAX_SIZE = 256;
-
-	CRITICAL_SECTION* m_criticalSection;
-
-	LogFileWriter* m_logFileWriter;
-	LinkedList<double> m_linkedList;
-
 	static DWORD WINAPI LogSizeMonitoringThread(CONST LPVOID lpParam);
+	void InitializationHandle();
+
+	const size_t MAX_SIZE = 300;
+
+	CRITICAL_SECTION m_criticalSection;
+	LogFileWriter* m_logFileWriter;
+	LinkedList<std::string> m_linkedList;
+	HANDLE m_handle;
+	HANDLE m_handleEvent;
 };
