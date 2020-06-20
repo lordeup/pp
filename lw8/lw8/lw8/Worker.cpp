@@ -17,7 +17,7 @@ bool Worker::ExecuteTask(ITask& task)
 		return false;
 	}
 
-	m_handle = CreateThread(NULL, 0, &ThreadProc, &task, CREATE_SUSPENDED, NULL);
+	m_handle = CreateThread(nullptr, 0, &ThreadProc, &task, CREATE_SUSPENDED, nullptr);
 	ResumeThread(m_handle);
 
 	return true;

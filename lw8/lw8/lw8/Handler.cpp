@@ -17,7 +17,7 @@ void Handler::Run(int argc, char* argv[])
 	if (strcmp(argv[1], "/") == 0)
 	{
 		std::cout << "Input should look:\n"
-					 "lw8.exe <operating mode> <input image> <output image> <number threads> <number core> <blur radius> <threads priorities>\n"
+					 "lw8.exe <operating mode> <input path> <output path> <number threads> <number core> <blur radius> <threads priorities>\n"
 					 "Operating mode:\n"
 					 "0 - usual\n1 - using pool\n"
 					 "Options priority:\n"
@@ -31,8 +31,8 @@ void Handler::Run(int argc, char* argv[])
 	}
 
 	int operatingMode = ParseNumber(argv[1]);
-	std::string inputImage = argv[2];
-	std::string outputImage = argv[3];
+	std::string inputPath = argv[2];
+	std::string outputPath = argv[3];
 
 	int threadCount = ParseNumber(argv[4]);
 	int coreCount = ParseNumber(argv[5]);
@@ -43,8 +43,29 @@ void Handler::Run(int argc, char* argv[])
 		throw std::invalid_argument("The number of priorities should be the same as the number of threads\n" + INFO_HINT);
 	}
 
+	if (!fs::exists(inputPath))
+	{
+		throw std::exception("This directory does not exist");
+	}
+
 	std::vector<std::string> inputImages;
 	std::vector<std::string> outputImages;
+
+	if (!fs::exists(outputPath))
+	{
+		fs::create_directories(outputPath);
+	}
+
+	for (const auto& file : fs::directory_iterator(inputPath))
+	{
+		auto path = file.path();
+
+		if (path.extension() == ".bmp")
+		{
+			inputImages.push_back(path.string());
+			outputImages.push_back(outputPath + std::string("\\") + path.stem().string() + "_blur.bmp");
+		}
+	}
 
 	std::vector<int> threadPriorities(threadCount);
 
@@ -57,13 +78,12 @@ void Handler::Run(int argc, char* argv[])
 	{
 		for (size_t i = 0; i < inputImages.size(); ++i)
 		{
-			BlurBmp blurBmp(inputImage, outputImage, threadCount, coreCount, blurRadius, threadPriorities);
+			BlurBmp blurBmp(inputImages[i], outputImages[i], threadCount, coreCount, blurRadius, threadPriorities);
 			blurBmp.Run();
 		}
 	}
 	else if (operatingMode == OperationMode::POOL)
 	{
-		int f = 0;
 	}
 	else
 	{
