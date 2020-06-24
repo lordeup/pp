@@ -12,81 +12,74 @@ int Handler::ParseNumber(const std::string str)
 	}
 }
 
+OperationMode Handler::ParseOperationMode(const std::string str)
+{
+	int operatingMode = ParseNumber(str);
+
+	if (operatingMode == 0)
+	{
+		return OperationMode::USUAL;
+	}
+	else if (operatingMode == 1)
+	{
+		return OperationMode::POOL;
+	}
+	else
+	{
+		throw std::invalid_argument("Incorrect operation mode: " + str);
+	}
+}
+
 void Handler::Run(int argc, char* argv[])
 {
 	if (strcmp(argv[1], "/") == 0)
 	{
 		std::cout << "Input should look:\n"
-					 "lw8.exe <operating mode> <input path> <output path> <number threads> <number core> <blur radius> <threads priorities>\n"
+					 "lw8.exe <operating mode> <number blocks> <input path> <output path> <blur radius> <number threads>\n"
 					 "Operating mode:\n"
-					 "0 - usual\n1 - using pool\n"
-					 "Options priority:\n"
-					 "-1 - below normal\n 0 - normal\n 1 - above normal\n";
+					 "0 - usual\n1 - using pool\n";
 		return;
 	}
 
-	if (argc < MIN_NUMBER_ARGUMENTS)
+	OperationMode operatingMode = ParseOperationMode(argv[1]);
+
+	if (argc != 7)
 	{
 		throw std::invalid_argument("The number of arguments does not match the task condition\n" + INFO_HINT);
 	}
 
-	int operatingMode = ParseNumber(argv[1]);
-	std::string inputPath = argv[2];
-	std::string outputPath = argv[3];
+	int blocksCount = ParseNumber(argv[2]);
 
-	int threadCount = ParseNumber(argv[4]);
-	int coreCount = ParseNumber(argv[5]);
-	int blurRadius = ParseNumber(argv[6]);
+	std::string inputPath = argv[3];
+	std::string outputPath = argv[4];
 
-	if (argc != MIN_NUMBER_ARGUMENTS + threadCount)
-	{
-		throw std::invalid_argument("The number of priorities should be the same as the number of threads\n" + INFO_HINT);
-	}
+	int blurRadius = ParseNumber(argv[5]);
+	int threadCount = ParseNumber(argv[6]);
 
-	if (!fs::exists(inputPath))
+	if (!std::filesystem::exists(inputPath))
 	{
 		throw std::exception("This directory does not exist");
+	}
+
+	if (!std::filesystem::exists(outputPath))
+	{
+		std::filesystem::create_directories(outputPath);
 	}
 
 	std::vector<std::string> inputImages;
 	std::vector<std::string> outputImages;
 
-	if (!fs::exists(outputPath))
-	{
-		fs::create_directories(outputPath);
-	}
-
-	for (const auto& file : fs::directory_iterator(inputPath))
+	for (const auto& file : std::filesystem::directory_iterator(inputPath))
 	{
 		auto path = file.path();
 
 		if (path.extension() == ".bmp")
 		{
 			inputImages.push_back(path.string());
-			outputImages.push_back(outputPath + std::string("\\") + path.stem().string() + "_blur.bmp");
+			outputImages.push_back(outputPath + "/" + path.stem().string() + "_blur.bmp");
 		}
 	}
 
-	std::vector<int> threadPriorities(threadCount);
-
-	for (size_t i = 0; i < threadPriorities.size(); ++i)
-	{
-		threadPriorities[i] = ParseNumber(argv[MIN_NUMBER_ARGUMENTS + i]);
-	}
-
-	if (operatingMode == OperationMode::USUAL)
-	{
-		for (size_t i = 0; i < inputImages.size(); ++i)
-		{
-			BlurBmp blurBmp(inputImages[i], outputImages[i], threadCount, coreCount, blurRadius, threadPriorities);
-			blurBmp.Run();
-		}
-	}
-	else if (operatingMode == OperationMode::POOL)
-	{
-	}
-	else
-	{
-		throw std::invalid_argument("Incorrect operation mode");
-	}
+	BlurBmp blurBmp(operatingMode, inputImages, outputImages, blurRadius, blocksCount, threadCount);
+	blurBmp.Run();
 }

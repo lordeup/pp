@@ -28,16 +28,8 @@ void Blur::Execute()
 			colour.blue = (unsigned char)(totalBlue / pixels.size());
 
 			m_thread.outputImage->set_pixel(width, height, colour);
-
-			*m_thread.logFile << m_thread.threadNumber << "\t" << GetTimeDifference(m_thread.startTime) << std::endl;
 		}
 	}
-}
-
-double Blur::GetTimeDifference(const std::clock_t& start)
-{
-	std::clock_t end = std::clock();
-	return std::difftime(end, start);
 }
 
 std::vector<rgb_t> Blur::GetPixels(const int height, const int width, const ThreadData& thread)

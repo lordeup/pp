@@ -1,26 +1,30 @@
 #pragma once
-#define NOMINMAX
 #include "Blur.h"
-#include <Windows.h>
+#include "ThreadPool.h"
 #include <algorithm>
 #include <fstream>
 #include <string>
-#include <vector>
+
+enum class OperationMode
+{
+	USUAL,
+	POOL,
+};
 
 class BlurBmp
 {
 public:
-	BlurBmp(const std::string input, const std::string output, const int threadCount, const int coreCount, const int blurRadius, const std::vector<int>& threadPriorities);
+	BlurBmp(const OperationMode operationMode, const std::vector<std::string>& inputImages, const std::vector<std::string>& outputImages, const int blurRadius, const int blocksCount, const int threadCount);
 
 	void Run();
 
 private:
-	std::vector<ThreadData> GetThreadsData(const bitmap_image& inputImage, bitmap_image* outputImage, std::clock_t& start) const;
+	std::vector<ThreadData> GetThreadsData(const bitmap_image& inputImage, bitmap_image* outputImage) const;
 
-	std::string m_input;
-	std::string m_output;
-	int m_threadCount;
-	int m_coreCount;
+	OperationMode m_operationMode;
+	std::vector<std::string> m_inputImages;
+	std::vector<std::string> m_outputImages;
 	int m_blurRadius;
-	std::vector<int> m_threadPriorities;
+	int m_blocksCount;
+	int m_threadCount;
 };
